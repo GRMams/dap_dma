@@ -19,19 +19,21 @@ import com.google.api.services.gmail.model.ListLabelsResponse;
 import com.google.api.services.gmail.model.ListMessagesResponse;
 import com.google.api.services.gmail.model.Message;
 
-import fr.houseofcode.dap.server.dma.GmailService;
+//TODO DMA by Djer |Audit Code| Prends en compte les remarques de CheckStyle !
+//TODO DMA by Djer |JavaDoc| Il manque la description de la classe
 
 /**
  * @author adminHOC
  *
  */
 @Service
-public class GmailServiceImpl implements GmailService {
+public class GmailService {
 
     private static final String APPLICATION_NAME = "Gmail API Java Quickstart";
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final Logger LOG = LogManager.getLogger();
 
+    //TODO DMA by Djer |POO| Les paramètres doivent commencer par une minuscule.
     /**
      * allow the secured acess to Gmail.
      * @return a GmailService instance with secured transport.
@@ -39,7 +41,7 @@ public class GmailServiceImpl implements GmailService {
      * @throws GeneralSecurityException i there's a security failure.
      */
     private Gmail getService(String UserKey) throws IOException, GeneralSecurityException {
-        //TODO DMA by Djer |Log4J| Contextualise tes messages " ... for userKey : " + UserKey".
+        //TODO DMA by Djer |Log4J| contextualise tesm essages de log "for userKey + " UserKey.
         LOG.debug("Connexion au service utilisateur de Google ... :  ");
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         Gmail service = new Gmail.Builder(HTTP_TRANSPORT, JSON_FACTORY, Utils.getCredentials(HTTP_TRANSPORT, UserKey))
@@ -47,57 +49,57 @@ public class GmailServiceImpl implements GmailService {
         return service;
     }
 
+    //TODO DMA by Djer |POO| Les paramètres doivent commencer par une minuscule.
     /**.
      * allow a secured acess to Gmail
      * @return The labels of the inbox user
      * @throws IOException ins an output or output exception for some instances.
      * @throws GeneralSecurityException is a generic security exception.
      */
-    @Override
     public String getLabels(String UserKey) throws IOException, GeneralSecurityException {
-        //TODO DMA by Djer |POO| Ce commentaire est devenu faux
         // Print the labels in the user's account.
-        //TODO DMA by Djer |Log4J| Contextualise tes messages " ... for userKey : " + UserKey".
+        //TODO DMA by Djer |IDE| Encodage : attention tes fichiers étaient encodés en ISO-8859-2 lorsque tu as ajouté ce messages !
+        //TODO DMA by Djer |Log4J| Contectualise tes messages " ... for userKey : " + UserKey".
         LOG.debug("RÃ©cupÃ©ration des labels de l'utilisateur ... :  ");
         String user = "me";
         ListLabelsResponse listResponse = getService(UserKey).users().labels().list(user).execute();
         List<Label> labels = listResponse.getLabels();
         String message = " ";
         if (labels.isEmpty()) {
-            return "Vous n'avez aucun label.";
+            //TODO DMA by Djer |IDE| Evite les multiple return dans une même méthode. Alimente ta variable "message" existante. Tes if/else évite déja d'éxécuter du code inutilement.
+            return "Vous n'avez pas de label";
         } else {
 
             for (Label label : labels) {
+                //TODO DMA by Djer |Rest API| Dans une API REST évite de formater les messages. Renvoie une Liste et laisse le client (ou thymeLeaf) effectuer la présentation.
                 message = message + " \n " + label.getName();
             }
         }
         return message;
     }
 
+    //TODO DMA by Djer |POO| Les paramètres doivent commencer par une minuscule.
+    //TODO DMA by Djer |POO| Les paramètres doivent commencer par une minuscule.
     /**
      * @return The UnreadedMail of the user inbox
      * @throws IOException
      * @throws GeneralSecurityException
      */
-    @Override
     public Integer UnreadedMail(String Userkey) throws IOException, GeneralSecurityException {
-        LOG.info("RÃ©cupÃ©ration du nombre d'email pour l'utilisateur " + Userkey);
-
-        //TODO DMA by Djer |Log4J|  Cette Log est redondante avec celle du dessus. Quelqu'un lisant les logs "debug" vera forcément les logs Info car le niveau "info" est plus élévé que "debug".
+        //TODO DMA by Djer |IDE| Encodage : attention tes fichiers étaient encodés en ISO-8859-2 lorsque tu as ajouté ce message !
+        //TODO DMA by Djer |Log4J| Contectualise tes messages " ... for userKey : " + UserKey".
         LOG.debug("AccÃ©s aux emails non lus de l'utilisateur ... :  ");
         Integer result = 0;
         String user = "me";
         ListMessagesResponse listMResponse = getService(Userkey).users().messages().list(user)
                 .setQ("is:unread in:inbox -category:promotions -category:social").execute();
-
         List<Message> messages = listMResponse.getMessages();
 
+        //TODO DMA by Djer |API Google| Il faut prendre en compte la pagination des résultats. Ici un utilisateur qui a plus de 100 email non lut verra affiché "100".
         if (messages != null) {
             if (!messages.isEmpty()) {
                 result = messages.size();
             }
-            //TODO DMA by Djer |Log4J| Contextualise tes messages " ... for userKey : " + UserKey".
-            LOG.info("Nombre de messages : " + messages.size());
         }
         return result;
     }
@@ -113,7 +115,8 @@ public class GmailServiceImpl implements GmailService {
        */
     public static List<Message> listMessagesMatchingQuery(Gmail service, String userId, String query)
             throws IOException {
-        //TODO DMA by Djer |Log4J| Contextualise tes messages " ... for userKey : " + userId".
+        //TODO DMA by Djer |IDE| Encodage : attention tes fichiers étaient encodés en ISO-8859-2 lorsque tu as ajouté ce message !
+        //TODO DMA by Djer |Log4J| Contectualise tes messages " ... for userKey : " + UserKey".
         LOG.debug("RÃ©cupÃ©ration de la liste des messages de l'utilisateur ... :  ");
         ListMessagesResponse response = service.users().messages().list(userId).setQ(query).execute();
 
@@ -129,7 +132,7 @@ public class GmailServiceImpl implements GmailService {
         }
 
         for (Message message : messages) {
-            //TODO DMA by Djer |Log4J| Pas de SysOut sur un serveur ! Eventuellement une log (en debug ?)
+            //TODO DMA by Djer |POO| Pas de SysOut sur un serveur ! (soit une log.debug, soit supprimer cette ligne)
             System.out.println(message.toPrettyString());
         }
 
